@@ -1,0 +1,83 @@
+import random
+
+class Warrior:
+    def __init__(self, name):
+        self.name = name
+        self.health = 100
+        self.armor = 50
+        self.stamina = 50
+
+    def attack(self, enemy):
+        if self.stamina > 0:
+            damage = random.randint(10, 30)
+            self.stamina -= 10
+        else:
+            damage = random.randint(0, 10)
+        enemy.take_damage(damage)
+        print(f"{self.name} атаковал {enemy.name}. {enemy.name} получил {damage} урона.")
+
+    def defend(self, enemy):
+        if enemy.stamina > 0:
+            health_damage = random.randint(0, 20)
+            armor_damage = random.randint(0, 10)
+        else:
+            health_damage = random.randint(10, 30)
+            armor_damage = 0
+
+        if self.armor > 0:
+            self.armor = max(0, self.armor - armor_damage)
+            self.health = max(0, self.health - health_damage)
+        else:
+            self.health = max(0, self.health - random.randint(10, 30))
+
+        print(f"{self.name} защищался от атаки {enemy.name}. Осталось {self.health} здоровья и {self.armor} брони.")
+
+    def take_damage(self, damage):
+        if self.armor > 0:
+            self.armor = max(0, self.armor - damage // 2)
+            self.health = max(0, self.health - damage // 2)
+        else:
+            self.health = max(0, self.health - damage)
+
+# Создаем двух воинов
+warrior1 = Warrior("Воин 1")
+warrior2 = Warrior("Воин 2")
+
+# Симуляция боя
+while True:
+    action1 = random.choice(["attack", "defend"])
+    action2 = random.choice(["attack", "defend"])
+
+    if action1 == "attack" and action2 == "attack":
+        warrior1.attack(warrior2)
+        warrior2.attack(warrior1)
+    elif action1 == "attack" and action2 == "defend":
+        warrior1.attack(warrior2)
+        warrior2.defend(warrior1)
+    elif action1 == "defend" and action2 == "attack":
+        warrior1.defend(warrior2)
+        warrior2.attack(warrior1)
+    else:
+        print("Оба воина защищаются. Ничего не происходит.")
+
+    # Проверка на поражение
+    if warrior1.health <= 10 or warrior2.health <= 10:
+        if warrior1.health <= 10:
+            loser = warrior1
+        else:
+            loser = warrior2
+
+        while True:
+            try:
+                decision = input(f"{loser.name} проиграл! Убить его? (yes/no): ").strip().lower()
+                if decision not in ["yes", "no"]:
+                    raise ValueError("Некорректный ввод. Введите 'yes' или 'no'.")
+                break
+            except ValueError as e:
+                print(e)
+
+        if decision == "yes":
+            print(f"{loser.name} был казнен!")
+        else:
+            print(f"{loser.name} был помилован!")
+        break
