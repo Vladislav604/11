@@ -1,0 +1,81 @@
+import random
+
+class Warrior:
+    def __init__(self, name):
+        self.name = name
+        self.health = 100
+        self.armor = 50
+        self.stamina = 50
+
+    def attack(self, enemy):
+        if self.stamina > 0:
+            damage = random.randint(10, 30)
+            self.stamina -= 10
+        else:
+            damage = random.randint(0, 10)
+        enemy.take_damage(damage)
+        print(f"{self.name} атаковал {enemy.name}. {enemy.name} получил {damage} урона.")
+
+    def defend(self, enemy):
+        if enemy.stamina > 0:
+            health_damage = random.randint(0, 20)
+            armor_damage = random.randint(0, 10)
+        else:
+            health_damage = random.randint(10, 30)
+            armor_damage = 0
+
+        if self.armor > 0:
+            self.armor = max(0, self.armor - armor_damage)
+            self.health = max(0, self.health - health_damage)
+        else:
+            self.health = max(0, self.health - random.randint(10, 30))
+
+        print(f"{self.name} защищался от атаки {enemy.name}. Осталось {self.health} здоровья и {self.armor} брони.")
+
+    def take_damage(self, damage):
+        if self.armor > 0:
+            self.armor = max(0, self.armor - damage // 2)
+            self.health = max(0, self.health - damage // 2)
+        else:
+            self.health = max(0, self.health - damage)
+
+# Тесты для проверки логики
+if __name__ == "__main__":
+    import os
+    import unittest
+
+    class TestWarrior(unittest.TestCase):
+        def setUp(self):
+            self.warrior1 = Warrior("Воин 1")
+            self.warrior2 = Warrior("Воин 2")
+
+        def test_initial_values(self):
+            self.assertEqual(self.warrior1.health, 100)
+            self.assertEqual(self.warrior1.armor, 50)
+            self.assertEqual(self.warrior1.stamina, 50)
+
+        def test_attack(self):
+            self.warrior1.attack(self.warrior2)
+            self.assertLessEqual(self.warrior2.health, 100)
+            self.assertLessEqual(self.warrior1.stamina, 50)
+
+        def test_defend(self):
+            self.warrior2.attack(self.warrior1)
+            self.warrior1.defend(self.warrior2)
+            self.assertLessEqual(self.warrior1.health, 100)
+            self.assertLessEqual(self.warrior1.armor, 50)
+
+        def test_take_damage(self):
+            self.warrior1.take_damage(20)
+            self.assertLessEqual(self.warrior1.health, 100)
+            self.assertLessEqual(self.warrior1.armor, 50)
+
+    # Запуск тестов
+    test_dir = "test"
+    os.makedirs(test_dir, exist_ok=True)
+    os.chdir(test_dir)
+
+    with open("test_warrior.py", "w") as test_file:
+        test_file.write(TestWarrior.__module__)
+
+    unittest.main()
